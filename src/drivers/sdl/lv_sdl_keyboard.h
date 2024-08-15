@@ -32,6 +32,7 @@ extern "C" {
  **********************/
 
 lv_indev_t * lv_sdl_keyboard_create(void);
+lv_indev_t * my_read_kbd(void);
 
 /**********************
  *      MACROS

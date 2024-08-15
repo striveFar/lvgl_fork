@@ -63,6 +63,28 @@ lv_indev_t * lv_sdl_keyboard_create(void)
     return indev;
 }
 
+static void app_keyboard_read(lv_indev_t *indev, lv_indev_data_t *data)
+{
+	static uint8_t state = 0;
+	if (data->state == LV_INDEV_STATE_PRESSED && state == 0) {
+		state = 1;
+		// 如果下键按下,就切换组group 里面的聚焦组件
+		if (data->key == LV_KEY_DOWN) {
+			LV_LOG_USER("down key pressed");
+			lv_group_focus_next(lv_group_get_default());
+		} else if (data->key == LV_KEY_UP) {
+			lv_group_focus_prev(lv_group_get_default());
+			LV_LOG_USER("up key pressed");
+		} else if (data->key == LV_KEY_LEFT) {
+			LV_LOG_USER("left key pressed");
+		} else if (data->key == LV_KEY_RIGHT) {
+			LV_LOG_USER("right key pressed");
+		}
+	} else if (data->state == LV_INDEV_STATE_RELEASED) {
+		state = 0;
+		LV_LOG_USER("key RELEASED");
+	}
+}
 /**********************
  *   STATIC FUNCTIONS
  **********************/
@@ -85,6 +107,8 @@ static void sdl_keyboard_read(lv_indev_t * indev, lv_indev_data_t * data)
         data->key = dev->buf[0];
         memmove(dev->buf, dev->buf + 1, len);
     }
+
+    app_keyboard_read(indev, data);
 }
 
 static void release_indev_cb(lv_event_t * e)
@@ -98,6 +122,22 @@ static void release_indev_cb(lv_event_t * e)
         LV_LOG_INFO("done");
     }
 }
+
+
+
+// lv_indev_t * my_read_kbd(void)
+// {
+//     lv_indev_t * indev = lv_indev_create();
+//     LV_ASSERT_MALLOC(indev);
+//     if(indev == NULL) {
+//         return NULL;
+//     }
+
+//     lv_indev_set_type(indev, LV_INDEV_TYPE_KEYPAD);
+//     lv_indev_set_read_cb(indev, app_keyboard_read);
+
+//     return indev;
+// }
 
 void _lv_sdl_keyboard_handler(SDL_Event * event)
 {
